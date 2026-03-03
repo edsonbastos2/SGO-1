@@ -1,0 +1,842 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum UserStatus {
+  ATIVO
+  INATIVO
+  BLOQUEADO
+}
+
+enum Setor {
+  TI_ADMIN
+  OPERACAO
+  RH
+  FINANCEIRO
+  CONTROLADORIA
+  SUPERVISOR_EXTERNO
+}
+
+enum AcaoPermissao {
+  V
+  C
+  E
+  L
+  D
+  A
+  P
+  X
+  AU
+}
+
+enum CapacidadeCritica {
+  APROVAR_EXTRAS
+  PARAMETRIZAR
+  CANCELAR_EXCLUIR
+  REABRIR_COMPETENCIA
+  AJUSTAR_CALENDARIO
+}
+
+enum StatusColaborador {
+  ATIVO
+  RESERVA
+  DESLIGADO
+  AFASTADO
+}
+
+enum StatusAlocacao {
+  ATIVA
+  ENCERRADA
+}
+
+enum StatusExtra {
+  PENDENTE
+  APROVADO
+  REPROVADO
+  CANCELADO
+}
+
+enum CategoriaExtra {
+  HORA_EXTRA
+  SUBSTITUICAO
+  ADICIONAL
+  OUTROS
+}
+
+enum TipoFalta {
+  INJUSTIFICADA
+  JUSTIFICADA
+  ATESTADO
+  ABONO
+  OUTROS
+}
+
+enum StatusCompetencia {
+  ABERTA
+  FECHADA
+}
+
+enum TipoFeriado {
+  NACIONAL
+  ESTADUAL
+  MUNICIPAL
+  FACULTATIVO
+}
+
+enum FormatoExportacao {
+  XLSX
+  CSV
+  XLSM
+  PDF
+  DOCX
+}
+
+enum TipoAuditoria {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  EXPORT
+  APPROVE
+  REJECT
+  BLOCK
+  REOPEN
+}
+
+enum TipoRelatorio {
+  RPT_001
+  RPT_002
+  RPT_003
+  RPT_004
+  RPT_005
+  RPT_006
+  RPT_007
+  RPT_010
+  RPT_011
+  RPT_012
+  RPT_020
+  RPT_021
+  RPT_022
+  RPT_023
+}
+
+// ============================================================
+// PRESTADORAS
+// ============================================================
+
+model Prestadora {
+  id           String   @id @default(cuid())
+  cnpj         String   @unique
+  razaoSocial  String   @map("razao_social")
+  nomeFantasia String?  @map("nome_fantasia")
+  endereco     String?
+  cidade       String?
+  uf           String?
+  cep          String?
+  telefone     String?
+  email        String?
+  ativo        Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt      @map("updated_at")
+
+  usuarios          UsuarioPrestadora[]
+  colaboradores     Colaborador[]
+  tomadores         Tomador[]
+  valoresBeneficios ValorBeneficio[]
+
+  @@map("prestadoras")
+}
+
+// ============================================================
+// USUÁRIOS
+// ============================================================
+
+model Usuario {
+  id              String     @id @default(cuid())
+  nome            String
+  login           String     @unique
+  email           String     @unique
+  senhaHash       String     @map("senha_hash")
+  setor           Setor
+  status          UserStatus @default(ATIVO)
+  primeiroAcesso  Boolean    @default(true) @map("primeiro_acesso")
+  tentativasLogin Int        @default(0)    @map("tentativas_login")
+  ultimoAcesso    DateTime?                 @map("ultimo_acesso")
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt      @map("updated_at")
+
+  prestadoras            UsuarioPrestadora[]
+  capacidades            CapacidadeUsuario[]     @relation("UsuarioCapacidade")
+  capacidadesSolicitadas CapacidadeUsuario[]     @relation("GerenteCapacidade")
+  escopoSupervisor       EscopoSupervisor?
+  auditoriasRealizadas   AuditoriaLog[]          @relation("AuditUserRelation")
+  exportacoes            ExportacaoLog[]
+  calendarioAjustes      CalendarioColaborador[] @relation("CalendarioAjuste")
+  ocorrenciasCanceladas  Ocorrencia[]            @relation("OcorrenciaCancelamento")
+  recibosGerados         Recibo[]                @relation("ReciboGerador")
+  extrasAprovados        Extra[]                 @relation("ExtraAprovador")
+
+  @@map("usuarios")
+}
+
+model UsuarioPrestadora {
+  id           String   @id @default(cuid())
+  usuarioId    String   @map("usuario_id")
+  prestadoraId String   @map("prestadora_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  usuario    Usuario    @relation(fields: [usuarioId],    references: [id])
+  prestadora Prestadora @relation(fields: [prestadoraId], references: [id])
+
+  @@unique([usuarioId, prestadoraId])
+  @@map("usuario_prestadoras")
+}
+
+model CapacidadeUsuario {
+  id            String            @id @default(cuid())
+  usuarioId     String            @map("usuario_id")
+  capacidade    CapacidadeCritica
+  gerenteId     String            @map("gerente_id")
+  justificativa String
+  validadeAte   DateTime?         @map("validade_ate")
+  ativo         Boolean           @default(true)
+  createdAt     DateTime          @default(now()) @map("created_at")
+  revogedAt     DateTime?         @map("revoked_at")
+
+  usuario Usuario @relation("UsuarioCapacidade", fields: [usuarioId], references: [id])
+  gerente Usuario @relation("GerenteCapacidade", fields: [gerenteId], references: [id])
+
+  @@map("capacidades_usuarios")
+}
+
+model EscopoSupervisor {
+  id        String   @id @default(cuid())
+  usuarioId String   @unique @map("usuario_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt      @map("updated_at")
+
+  usuario Usuario                @relation(fields: [usuarioId], references: [id])
+  itens   EscopoSupervisorItem[]
+
+  @@map("escopo_supervisores")
+}
+
+model EscopoSupervisorItem {
+  id        String  @id @default(cuid())
+  escopoId  String  @map("escopo_id")
+  tomadorId String  @map("tomador_id")
+  postoId   String? @map("posto_id")
+  turnoId   String? @map("turno_id")
+
+  escopo  EscopoSupervisor @relation(fields: [escopoId],  references: [id])
+  tomador Tomador          @relation(fields: [tomadorId], references: [id])
+  posto   PostoTrabalho?   @relation(fields: [postoId],   references: [id])
+  turno   Turno?           @relation(fields: [turnoId],   references: [id])
+
+  @@map("escopo_supervisor_itens")
+}
+
+model PermissaoModulo {
+  id     String        @id @default(cuid())
+  setor  Setor
+  modulo String
+  acao   AcaoPermissao
+
+  @@unique([setor, modulo, acao])
+  @@map("permissoes_modulos")
+}
+
+// ============================================================
+// TOMADORES E POSTOS
+// ============================================================
+
+model Tomador {
+  id             String   @id @default(cuid())
+  prestadoraId   String   @map("prestadora_id")
+  cnpjCpf        String   @map("cnpj_cpf")
+  razaoSocial    String   @map("razao_social")
+  nomeFantasia   String?  @map("nome_fantasia")
+  endereco       String?
+  cidade         String?
+  uf             String?
+  telefone       String?
+  email          String?
+  exigeAprovacao Boolean  @default(false) @map("exige_aprovacao")
+  vtdPadrao      Decimal? @db.Decimal(10, 2) @map("vtd_padrao")
+  vaPadrao       Decimal? @db.Decimal(10, 2) @map("va_padrao")
+  vaJornadaMin   Decimal? @db.Decimal(4, 2)  @map("va_jornada_min")
+  ativo          Boolean  @default(true)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt      @map("updated_at")
+
+  prestadora  Prestadora             @relation(fields: [prestadoraId], references: [id])
+  postos      PostoTrabalho[]
+  escopoItens EscopoSupervisorItem[]
+
+  @@unique([prestadoraId, cnpjCpf])
+  @@map("tomadores")
+}
+
+model PostoTrabalho {
+  id            String   @id @default(cuid())
+  tomadorId     String   @map("tomador_id")
+  identificador String
+  endereco      String?
+  cidade        String?
+  uf            String?
+  tipo          String?
+  observacoes   String?
+  ativo         Boolean  @default(true)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt      @map("updated_at")
+
+  tomador      Tomador                @relation(fields: [tomadorId], references: [id])
+  vagas        VagaPosto[]
+  alocacoes    Alocacao[]
+  feriados     FeriadoLocalidade[]
+  escopoItens  EscopoSupervisorItem[]
+  extras       Extra[]
+  faltas       Falta[]
+  feriadosTrab FeriadoTrabalhado[]
+  ocorrencias  Ocorrencia[]
+
+  @@map("postos_trabalho")
+}
+
+// ============================================================
+// FUNÇÕES E VAGAS
+// ============================================================
+
+model Funcao {
+  id        String   @id @default(cuid())
+  nome      String   @unique
+  descricao String?
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt      @map("updated_at")
+
+  vagas         VagaPosto[]
+  alocacoes     Alocacao[]
+  colaboradores Colaborador[]
+
+  @@map("funcoes")
+}
+
+model VagaPosto {
+  id         String @id @default(cuid())
+  postoId    String @map("posto_id")
+  funcaoId   String @map("funcao_id")
+  quantidade Int
+
+  posto  PostoTrabalho @relation(fields: [postoId],  references: [id])
+  funcao Funcao        @relation(fields: [funcaoId], references: [id])
+
+  @@unique([postoId, funcaoId])
+  @@map("vagas_postos")
+}
+
+// ============================================================
+// CANDIDATOS
+// ============================================================
+
+model Candidato {
+  id          String   @id @default(cuid())
+  nome        String
+  cpf         String?
+  telefone    String?
+  email       String?
+  status      String   @default("ATIVO")
+  observacoes String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt      @map("updated_at")
+
+  @@map("candidatos")
+}
+
+// ============================================================
+// COLABORADORES
+// ============================================================
+
+model Colaborador {
+  id               String           @id @default(cuid())
+  prestadoraId     String           @map("prestadora_id")
+  matricula        String
+  cpf              String           @unique
+  nome             String
+  dataNasc         DateTime?        @map("data_nasc")
+  telefone         String?
+  email            String?
+  dataAdmissao     DateTime         @map("data_admissao")
+  dataDesligamento DateTime?        @map("data_desligamento")
+  funcaoId         String?          @map("funcao_id")
+  escalaId         String?          @map("escala_id")
+  status           StatusColaborador @default(ATIVO)
+  tipoPix          String?          @map("tipo_pix")
+  chavePix         String?          @map("chave_pix")
+  banco            String?
+  agencia          String?
+  contaBancaria    String?          @map("conta_bancaria")
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt      @map("updated_at")
+
+  prestadora       Prestadora             @relation(fields: [prestadoraId], references: [id])
+  funcao           Funcao?                @relation(fields: [funcaoId],     references: [id])
+  escala           Escala?                @relation(fields: [escalaId],     references: [id])
+  alocacoes        Alocacao[]
+  asos             ASO[]
+  beneficios       ColaboradorBeneficio[]
+  extras           Extra[]                @relation("ColaboradorExtra")
+  extrasAusente    Extra[]                @relation("ColaboradorAusente")
+  faltas           Falta[]                @relation("ColaboradorFalta")
+  faltasSubstituto Falta[]                @relation("ColaboradorSubstituto")
+  feriadosTrab     FeriadoTrabalhado[]
+  ocorrencias      Ocorrencia[]
+  calendarios      CalendarioColaborador[]
+  dependentes      BeneficioDependente[]
+
+  @@unique([prestadoraId, matricula])
+  @@map("colaboradores")
+}
+
+model Alocacao {
+  id                 String         @id @default(cuid())
+  colaboradorId      String         @map("colaborador_id")
+  postoId            String         @map("posto_id")
+  funcaoId           String         @map("funcao_id")
+  turnoId            String         @map("turno_id")
+  dataInicio         DateTime       @map("data_inicio")
+  dataFim            DateTime?      @map("data_fim")
+  motivoEncerramento String?        @map("motivo_encerramento")
+  status             StatusAlocacao @default(ATIVA)
+  createdAt          DateTime       @default(now()) @map("created_at")
+  updatedAt          DateTime       @updatedAt      @map("updated_at")
+
+  colaborador Colaborador   @relation(fields: [colaboradorId], references: [id])
+  posto       PostoTrabalho @relation(fields: [postoId],       references: [id])
+  funcao      Funcao        @relation(fields: [funcaoId],      references: [id])
+  turno       Turno         @relation(fields: [turnoId],       references: [id])
+
+  @@map("alocacoes")
+}
+
+model ASO {
+  id              String    @id @default(cuid())
+  colaboradorId   String    @map("colaborador_id")
+  dataAdmissional DateTime? @map("data_admissional")
+  dataRenovacao   DateTime? @map("data_renovacao")
+  observacoes     String?
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt      @map("updated_at")
+
+  colaborador Colaborador @relation(fields: [colaboradorId], references: [id])
+
+  @@map("asos")
+}
+
+// ============================================================
+// ESCALAS, TURNOS E CALENDÁRIO
+// ============================================================
+
+model Escala {
+  id           String   @id @default(cuid())
+  nome         String
+  padrao       String?
+  jornadaHoras Decimal  @db.Decimal(4, 2) @map("jornada_horas")
+  intervaloMin Int                         @map("intervalo_min")
+  regrasSabado String?                     @map("regras_sabado")
+  ativo        Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt      @map("updated_at")
+
+  colaboradores Colaborador[]
+
+  @@map("escalas")
+}
+
+model Turno {
+  id        String   @id @default(cuid())
+  nome      String
+  entrada   String
+  intervalo String
+  retorno   String
+  saida     String
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt      @map("updated_at")
+
+  alocacoes    Alocacao[]
+  extras       Extra[]
+  faltas       Falta[]
+  feriadosTrab FeriadoTrabalhado[]
+  escopoItens  EscopoSupervisorItem[]
+
+  @@map("turnos")
+}
+
+model Competencia {
+  id                      String            @id @default(cuid())
+  mes                     Int
+  ano                     Int
+  dataAbertura            DateTime          @map("data_abertura")
+  dataFechamento          DateTime?         @map("data_fechamento")
+  status                  StatusCompetencia @default(ABERTA)
+  justificativaReabertura String?           @map("justificativa_reabertura")
+  createdAt               DateTime          @default(now()) @map("created_at")
+  updatedAt               DateTime          @updatedAt      @map("updated_at")
+
+  calendarios  CalendarioColaborador[]
+  extras       Extra[]
+  faltas       Falta[]
+  feriadosTrab FeriadoTrabalhado[]
+
+  @@unique([mes, ano])
+  @@map("competencias")
+}
+
+model CalendarioColaborador {
+  id            String   @id @default(cuid())
+  colaboradorId String   @map("colaborador_id")
+  competenciaId String   @map("competencia_id")
+  data          DateTime @db.Date
+  trabalhado    Boolean  @default(true)
+  feriado       Boolean  @default(false)
+  falta         Boolean  @default(false)
+  justificativa String?
+  ajustadoPorId String?  @map("ajustado_por_id")
+  ajusteJustif  String?  @map("ajuste_justif")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt      @map("updated_at")
+
+  colaborador Colaborador  @relation(fields: [colaboradorId], references: [id])
+  competencia Competencia  @relation(fields: [competenciaId], references: [id])
+  ajustadoPor Usuario?     @relation("CalendarioAjuste", fields: [ajustadoPorId], references: [id])
+
+  @@unique([colaboradorId, competenciaId, data])
+  @@map("calendario_colaboradores")
+}
+
+// ============================================================
+// BENEFÍCIOS
+// ============================================================
+
+model TipoBeneficio {
+  id                  String   @id @default(cuid())
+  nome                String   @unique
+  unidade             String
+  elegibilidadePadrao String?  @map("elegibilidade_padrao")
+  ativo               Boolean  @default(true)
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt      @map("updated_at")
+
+  fornecedores          TipoBeneficioFornecedor[]
+  valores               ValorBeneficio[]
+  colaboradorBeneficios ColaboradorBeneficio[]
+
+  @@map("tipos_beneficios")
+}
+
+model FornecedorBeneficio {
+  id        String   @id @default(cuid())
+  nome      String
+  cnpj      String   @unique
+  telefone  String?
+  email     String?
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt      @map("updated_at")
+
+  tipos TipoBeneficioFornecedor[]
+
+  @@map("fornecedores_beneficios")
+}
+
+model TipoBeneficioFornecedor {
+  id           String @id @default(cuid())
+  tipoId       String @map("tipo_id")
+  fornecedorId String @map("fornecedor_id")
+
+  tipo       TipoBeneficio       @relation(fields: [tipoId],       references: [id])
+  fornecedor FornecedorBeneficio @relation(fields: [fornecedorId], references: [id])
+
+  @@unique([tipoId, fornecedorId])
+  @@map("tipo_beneficio_fornecedores")
+}
+
+model ValorBeneficio {
+  id             String    @id @default(cuid())
+  tipoId         String    @map("tipo_id")
+  prestadoraId   String?   @map("prestadora_id")
+  localidade     String?
+  valor          Decimal   @db.Decimal(10, 2)
+  vigenciaInicio DateTime  @db.Date @map("vigencia_inicio")
+  vigenciaFim    DateTime? @db.Date @map("vigencia_fim")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt      @map("updated_at")
+
+  tipo       TipoBeneficio @relation(fields: [tipoId],       references: [id])
+  prestadora Prestadora?   @relation(fields: [prestadoraId], references: [id])
+
+  @@map("valores_beneficios")
+}
+
+model ColaboradorBeneficio {
+  id            String   @id @default(cuid())
+  colaboradorId String   @map("colaborador_id")
+  tipoId        String   @map("tipo_id")
+  optOut        Boolean  @default(false) @map("opt_out")
+  observacoes   String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt      @map("updated_at")
+
+  colaborador Colaborador   @relation(fields: [colaboradorId], references: [id])
+  tipo        TipoBeneficio @relation(fields: [tipoId],        references: [id])
+  dependentes BeneficioDependente[]
+
+  @@unique([colaboradorId, tipoId])
+  @@map("colaborador_beneficios")
+}
+
+model BeneficioDependente {
+  id            String   @id @default(cuid())
+  colaboradorId String   @map("colaborador_id")
+  beneficioId   String   @map("beneficio_id")
+  nome          String
+  cpf           String?
+  parentesco    String
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  colaborador Colaborador          @relation(fields: [colaboradorId], references: [id])
+  beneficio   ColaboradorBeneficio @relation(fields: [beneficioId],   references: [id])
+
+  @@map("beneficio_dependentes")
+}
+
+// ============================================================
+// EXTRAS
+// ============================================================
+
+model MotivoExtra {
+  id             String         @id @default(cuid())
+  nome           String         @unique
+  categoria      CategoriaExtra
+  exigeEvidencia Boolean        @default(false) @map("exige_evidencia")
+  exigeAprovacao Boolean        @default(true)  @map("exige_aprovacao")
+  ehSubstituicao Boolean        @default(false) @map("eh_substituicao")
+  ativo          Boolean        @default(true)
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt      @map("updated_at")
+
+  valores ValorExtra[]
+  extras  Extra[]
+
+  @@map("motivos_extras")
+}
+
+model ValorExtra {
+  id             String    @id @default(cuid())
+  motivoId       String    @map("motivo_id")
+  valor          Decimal   @db.Decimal(10, 2)
+  vigenciaInicio DateTime  @db.Date @map("vigencia_inicio")
+  vigenciaFim    DateTime? @db.Date @map("vigencia_fim")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  motivo MotivoExtra @relation(fields: [motivoId], references: [id])
+
+  @@map("valores_extras")
+}
+
+model Extra {
+  id             String      @id @default(cuid())
+  colaboradorId  String      @map("colaborador_id")
+  competenciaId  String      @map("competencia_id")
+  data           DateTime    @db.Date
+  postoId        String      @map("posto_id")
+  turnoId        String      @map("turno_id")
+  motivoId       String      @map("motivo_id")
+  ausenteId      String?     @map("ausente_id")
+  status         StatusExtra @default(PENDENTE)
+  observacao     String?
+  aprovadoPorId  String?     @map("aprovado_por")
+  aprovadoEm     DateTime?   @map("aprovado_em")
+  justReprovacao String?     @map("just_reprovacao")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt      @map("updated_at")
+
+  colaborador Colaborador   @relation("ColaboradorExtra",  fields: [colaboradorId], references: [id])
+  ausente     Colaborador?  @relation("ColaboradorAusente", fields: [ausenteId],    references: [id])
+  competencia Competencia   @relation(fields: [competenciaId], references: [id])
+  posto       PostoTrabalho @relation(fields: [postoId],       references: [id])
+  turno       Turno         @relation(fields: [turnoId],       references: [id])
+  motivo      MotivoExtra   @relation(fields: [motivoId],      references: [id])
+  aprovadoPor Usuario?      @relation("ExtraAprovador", fields: [aprovadoPorId],    references: [id])
+  evidencias  EvidenciaExtra[]
+
+  @@map("extras")
+}
+
+model EvidenciaExtra {
+  id         String   @id @default(cuid())
+  extraId    String   @map("extra_id")
+  tipo       String
+  dataHora   DateTime @map("data_hora")
+  descricao  String?
+  arquivoUrl String?  @map("arquivo_url")
+  enviadoPor String   @map("enviado_por")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  extra Extra @relation(fields: [extraId], references: [id])
+
+  @@map("evidencias_extras")
+}
+
+// ============================================================
+// FALTAS E FERIADOS
+// ============================================================
+
+model Falta {
+  id               String    @id @default(cuid())
+  colaboradorId    String    @map("colaborador_id")
+  competenciaId    String    @map("competencia_id")
+  data             DateTime  @db.Date
+  postoId          String    @map("posto_id")
+  turnoId          String    @map("turno_id")
+  tipo             TipoFalta
+  substitutoId     String?   @map("substituto_id")
+  coberto          Boolean   @default(false)
+  cancelado        Boolean   @default(false)
+  justCancelamento String?   @map("just_cancelamento")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt      @map("updated_at")
+
+  colaborador Colaborador   @relation("ColaboradorFalta",      fields: [colaboradorId], references: [id])
+  substituto  Colaborador?  @relation("ColaboradorSubstituto", fields: [substitutoId],  references: [id])
+  competencia Competencia   @relation(fields: [competenciaId], references: [id])
+  posto       PostoTrabalho @relation(fields: [postoId],       references: [id])
+  turno       Turno         @relation(fields: [turnoId],       references: [id])
+
+  @@map("faltas")
+}
+
+model FeriadoLocalidade {
+  id        String      @id @default(cuid())
+  data      DateTime    @db.Date
+  nome      String
+  tipo      TipoFeriado
+  uf        String?
+  cidade    String?
+  postoId   String?     @map("posto_id")
+  ativo     Boolean     @default(true)
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt      @map("updated_at")
+
+  posto PostoTrabalho? @relation(fields: [postoId], references: [id])
+
+  @@map("feriados_localidades")
+}
+
+model FeriadoTrabalhado {
+  id            String   @id @default(cuid())
+  colaboradorId String   @map("colaborador_id")
+  competenciaId String   @map("competencia_id")
+  data          DateTime @db.Date
+  postoId       String   @map("posto_id")
+  turnoId       String   @map("turno_id")
+  observacao    String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt      @map("updated_at")
+
+  colaborador Colaborador   @relation(fields: [colaboradorId], references: [id])
+  competencia Competencia   @relation(fields: [competenciaId], references: [id])
+  posto       PostoTrabalho @relation(fields: [postoId],       references: [id])
+  turno       Turno         @relation(fields: [turnoId],       references: [id])
+
+  @@map("feriados_trabalhados")
+}
+
+// ============================================================
+// OCORRÊNCIAS E RECIBOS
+// ============================================================
+
+model Ocorrencia {
+  id               String    @id @default(cuid())
+  colaboradorId    String    @map("colaborador_id")
+  postoId          String?   @map("posto_id")
+  data             DateTime  @db.Date
+  descricao        String
+  arquivoUrl       String?   @map("arquivo_url")
+  cancelado        Boolean   @default(false)
+  justCancelamento String?   @map("just_cancelamento")
+  canceladoPorId   String?   @map("cancelado_por")
+  canceladoEm      DateTime? @map("cancelado_em")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt      @map("updated_at")
+
+  colaborador  Colaborador    @relation(fields: [colaboradorId],  references: [id])
+  posto        PostoTrabalho? @relation(fields: [postoId],        references: [id])
+  canceladoPor Usuario?       @relation("OcorrenciaCancelamento", fields: [canceladoPorId], references: [id])
+
+  @@map("ocorrencias")
+}
+
+model Recibo {
+  id             String   @id @default(cuid())
+  tipo           String
+  referenciaId   String   @map("referencia_id")
+  referenciaTipo String   @map("referencia_tipo")
+  geradoPorId    String   @map("gerado_por")
+  arquivoUrl     String?  @map("arquivo_url")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  geradoPor Usuario @relation("ReciboGerador", fields: [geradoPorId], references: [id])
+
+  @@map("recibos")
+}
+
+// ============================================================
+// AUDITORIA E EXPORTAÇÕES
+// ============================================================
+
+model AuditoriaLog {
+  id          String        @id @default(cuid())
+  usuarioId   String?       @map("usuario_id")
+  tipo        TipoAuditoria
+  entidade    String
+  entidadeId  String?       @map("entidade_id")
+  descricao   String
+  dadosAntes  Json?         @map("dados_antes")
+  dadosDepois Json?         @map("dados_depois")
+  ip          String?
+  userAgent   String?       @map("user_agent")
+  createdAt   DateTime      @default(now()) @map("created_at")
+
+  usuario Usuario? @relation("AuditUserRelation", fields: [usuarioId], references: [id])
+
+  @@map("auditoria_logs")
+}
+
+model ExportacaoLog {
+  id         String            @id @default(cuid())
+  usuarioId  String            @map("usuario_id")
+  relatorio  TipoRelatorio
+  formato    FormatoExportacao
+  filtros    Json?
+  arquivoUrl String?           @map("arquivo_url")
+  status     String            @default("SUCESSO")
+  erro       String?
+  createdAt  DateTime          @default(now()) @map("created_at")
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+
+  @@map("exportacao_logs")
+}
