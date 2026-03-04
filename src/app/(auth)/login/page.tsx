@@ -180,7 +180,7 @@ export default function LoginPage() {
                 placeholder="seu.login ou email@empresa.com"
                 autoComplete="username"
                 autoFocus
-                prefix={<User size={14} />}
+                prefixIcon={<User size={14} />}
                 error={errors.login?.message}
                 {...register('login')}
               />
@@ -190,7 +190,7 @@ export default function LoginPage() {
                 type="password"
                 placeholder="••••••••"
                 autoComplete="current-password"
-                prefix={<Lock size={14} />}
+                prefixIcon={<Lock size={14} />}
                 error={errors.senha?.message}
                 {...register('senha')}
               />
