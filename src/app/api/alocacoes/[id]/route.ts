@@ -8,14 +8,18 @@ const schema = z.object({
   motivoEncerramento: z.string().optional().nullable(),
 });
 
+type RouteParams = {
+  id: string;
+};
+
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<RouteParams> },
 ) {
   try {
     const data = schema.parse(await req.json());
     const alocacao = await prisma.alocacao.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data: {
         status: data.status,
         dataFim: data.dataFim ? new Date(data.dataFim) : null,
