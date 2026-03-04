@@ -218,6 +218,12 @@ export default function NovoColaboradorPage() {
       alocacao:     [],
     }
     const campos = camposPorAba[aba] ?? []
+    
+    if (campos.length === 0) {
+      setAba(TABS[Math.min(abaIdx + 1, TABS.length - 1)].id)
+      return
+    }
+    
     const valido = await trigger(campos)
     if (!valido) return
   
