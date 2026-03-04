@@ -47,7 +47,11 @@ const schema = z.object({
   // Pessoal
   prestadoraId: z.string().min(1, "Obrigatório"),
   nome: z.string().min(2, "Mínimo 2 caracteres").max(120),
-  cpf: z.string().min(11, "CPF inválido").max(14),
+  cpf: z.string()
+  .min(11, 'CPF inválido')
+  .max(14)
+  .transform(v => v.replace(/\D/g, ''))
+  .refine(v => v.length === 11, 'CPF deve ter 11 dígitos'),
   dataNasc: z.string().optional(),
   telefone: z.string().max(20).optional(),
   email: z.string().optional(),
@@ -140,6 +144,7 @@ export default function NovoColaboradorPage() {
     register,
     handleSubmit,
     watch,
+    trigger,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -206,8 +211,19 @@ export default function NovoColaboradorPage() {
   };
 
   const abaIdx = TABS.findIndex((t) => t.id === aba);
-  const proximaAba = () =>
-    setAba(TABS[Math.min(abaIdx + 1, TABS.length - 1)].id);
+  const proximaAba = async () => {
+    const camposPorAba: Record<string, (keyof FormData)[]> = {
+      pessoal:      ['prestadoraId', 'nome', 'cpf'],
+      profissional: ['matricula', 'dataAdmissao'],
+      bancario:     [],
+      alocacao:     [],
+    }
+    const campos = camposPorAba[aba] ?? []
+    const valido = await trigger(campos)
+    if (!valido) return
+  
+    setAba(TABS[Math.min(abaIdx + 1, TABS.length - 1)].id)
+  }
   const voltarAba = () => setAba(TABS[Math.max(abaIdx - 1, 0)].id);
 
   return (
