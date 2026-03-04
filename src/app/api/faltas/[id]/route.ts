@@ -6,15 +6,21 @@ const schemaCancelar = z.object({
   justCancelamento: z.string().min(5, "Mínimo 5 caracteres"),
 });
 
+type RouteParams = {
+  id: string;
+};
+
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<RouteParams> },
 ) {
   try {
     const body = await req.json();
     const data = schemaCancelar.parse(body);
 
-    const falta = await prisma.falta.findUnique({ where: { id: params.id } });
+    const falta = await prisma.falta.findUnique({
+      where: { id: (await params).id },
+    });
     if (!falta)
       return NextResponse.json({ error: "Não encontrado" }, { status: 404 });
 
@@ -29,7 +35,7 @@ export async function DELETE(
       );
 
     await prisma.falta.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data: { cancelado: true, justCancelamento: data.justCancelamento },
     });
 

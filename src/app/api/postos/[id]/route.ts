@@ -12,15 +12,19 @@ const schema = z.object({
   ativo: z.boolean(),
 });
 
+type RouteParams = {
+  id: string;
+};
+
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<RouteParams> },
 ) {
   try {
     const body = await req.json();
     const data = schema.parse(body);
     const posto = await prisma.postoTrabalho.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data,
     });
     return NextResponse.json(posto);
@@ -36,11 +40,11 @@ export async function PUT(
 
 export async function DELETE(
   _: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<RouteParams> },
 ) {
   try {
     const posto = await prisma.postoTrabalho.findUnique({
-      where: { id: params.id },
+      where: { id: (await params).id },
       include: { _count: { select: { alocacoes: true } } },
     });
     if (!posto)
@@ -54,7 +58,7 @@ export async function DELETE(
       );
 
     await prisma.postoTrabalho.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data: { ativo: false },
     });
     return NextResponse.json({ ok: true });

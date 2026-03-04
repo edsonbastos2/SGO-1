@@ -8,16 +8,20 @@ const schema = z.object({
   ativo: z.boolean(),
 });
 
+type RouteParams = {
+  id: string;
+};
+
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<RouteParams> },
 ) {
   try {
     const body = await req.json();
     const data = schema.parse(body);
 
     const existe = await prisma.funcao.findFirst({
-      where: { nome: data.nome, NOT: { id: params.id } },
+      where: { nome: data.nome, NOT: { id: (await params).id } },
     });
     if (existe)
       return NextResponse.json(
@@ -26,7 +30,7 @@ export async function PUT(
       );
 
     const funcao = await prisma.funcao.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data,
     });
     return NextResponse.json(funcao);
@@ -42,11 +46,11 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<RouteParams> },
 ) {
   try {
     const funcao = await prisma.funcao.findUnique({
-      where: { id: params.id },
+      where: { id: (await params).id },
       include: { _count: { select: { colaboradores: true } } },
     });
     if (!funcao)
@@ -61,7 +65,7 @@ export async function DELETE(
 
     // Soft delete — apenas desativa
     await prisma.funcao.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data: { ativo: false },
     });
     return NextResponse.json({ ok: true });

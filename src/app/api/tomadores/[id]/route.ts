@@ -18,13 +18,17 @@ const schema = z.object({
   ativo: z.boolean(),
 });
 
+type RouteParams = {
+  id: string;
+};
+
 export async function GET(
   _: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<RouteParams> },
 ) {
   try {
     const tomador = await prisma.tomador.findUnique({
-      where: { id: params.id },
+      where: { id: (await params).id },
       include: { postos: true, _count: { select: { postos: true } } },
     });
     if (!tomador)
@@ -40,13 +44,13 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<RouteParams> },
 ) {
   try {
     const body = await req.json();
     const data = schema.parse(body);
     const tomador = await prisma.tomador.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data: { ...data, email: data.email || null },
     });
     return NextResponse.json(tomador);
@@ -62,11 +66,11 @@ export async function PUT(
 
 export async function DELETE(
   _: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<RouteParams> },
 ) {
   try {
     const tomador = await prisma.tomador.findUnique({
-      where: { id: params.id },
+      where: { id: (await params).id },
       include: { _count: { select: { postos: true } } },
     });
     if (!tomador)
@@ -80,7 +84,7 @@ export async function DELETE(
       );
 
     await prisma.tomador.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data: { ativo: false },
     });
     return NextResponse.json({ ok: true });

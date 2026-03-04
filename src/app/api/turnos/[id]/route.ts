@@ -31,13 +31,17 @@ export async function PUT(
   }
 }
 
+type RouteParams = {
+  id: string;
+};
+
 export async function DELETE(
   _: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<RouteParams> },
 ) {
   try {
     const turno = await prisma.turno.findUnique({
-      where: { id: params.id },
+      where: { id: (await params).id },
       include: { _count: { select: { alocacoes: true } } },
     });
     if (!turno)
@@ -49,7 +53,7 @@ export async function DELETE(
       );
 
     await prisma.turno.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data: { ativo: false },
     });
     return NextResponse.json({ ok: true });
