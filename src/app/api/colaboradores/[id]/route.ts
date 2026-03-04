@@ -20,13 +20,17 @@ const schema = z.object({
   contaBancaria: z.string().optional().nullable(),
 });
 
+type RouteParams = {
+  id: string;
+};
+
 export async function GET(
   _: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<RouteParams> },
 ) {
   try {
     const colaborador = await prisma.colaborador.findUnique({
-      where: { id: params.id },
+      where: { id: (await params).id },
       include: {
         prestadora: { select: { id: true, nomeFantasia: true } },
         funcao: true,
@@ -54,14 +58,14 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<RouteParams> },
 ) {
   try {
     const body = await req.json();
     const data = schema.parse(body);
 
     const colaborador = await prisma.colaborador.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data: {
         ...data,
         email: data.email || null,

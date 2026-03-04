@@ -7,9 +7,13 @@ const schemaFechar = z.object({
   justificativaReabertura: z.string().optional(),
 });
 
+type RouteParams = {
+  id: string;
+};
+
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<RouteParams> },
 ) {
   try {
     const body = await req.json();
@@ -17,7 +21,7 @@ export async function PUT(
 
     if (data.action === "fechar") {
       const competencia = await prisma.competencia.update({
-        where: { id: params.id },
+        where: { id: (await params).id },
         data: { status: "FECHADA", dataFechamento: new Date() },
       });
       return NextResponse.json(competencia);
@@ -31,7 +35,7 @@ export async function PUT(
         );
 
       const competencia = await prisma.competencia.update({
-        where: { id: params.id },
+        where: { id: (await params).id },
         data: {
           status: "ABERTA",
           dataFechamento: null,

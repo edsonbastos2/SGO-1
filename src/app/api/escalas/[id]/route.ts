@@ -32,13 +32,17 @@ export async function PUT(
   }
 }
 
+type RouteParams = {
+  id: string;
+};
+
 export async function DELETE(
   _: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<RouteParams> },
 ) {
   try {
     const escala = await prisma.escala.findUnique({
-      where: { id: params.id },
+      where: { id: (await params).id },
       include: { _count: { select: { colaboradores: true } } },
     });
     if (!escala)
@@ -52,7 +56,7 @@ export async function DELETE(
       );
 
     await prisma.escala.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data: { ativo: false },
     });
     return NextResponse.json({ ok: true });
