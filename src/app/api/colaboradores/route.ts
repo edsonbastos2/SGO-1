@@ -7,21 +7,21 @@ import { z } from 'zod'
 import { getUsuarioFromRequest } from '@/lib/auth/session'
 
 const ColaboradorSchema = z.object({
-  prestadoraId:  z.string().min(1),
-  matricula:     z.string().min(1).max(50),
-  cpf:           z.string().regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, 'CPF inválido'),
-  nome:          z.string().min(2).max(200),
-  dataNasc:      z.string().datetime().optional(),
-  telefone:      z.string().optional(),
-  email:         z.string().email().optional(),
-  dataAdmissao:  z.string(),
-  funcaoId:      z.string().optional(),
-  escalaId:      z.string().optional(),
-  tipoPix:       z.string().optional(),
-  chavePix:      z.string().optional(),
-  banco:         z.string().optional(),
-  agencia:       z.string().optional(),
-  contaBancaria: z.string().optional(),
+  prestadoraId:  z.string().min(1, 'Prestadora obrigatória'),
+  matricula:     z.string().min(1, 'Matrícula obrigatória').max(20),
+  cpf:           z.string().min(11).max(14).transform(v => v.replace(/\D/g, '')),
+  nome:          z.string().min(2, 'Mínimo 2 caracteres').max(120),
+  dataNasc:      z.string().optional().nullable().transform(v => v || null),
+  telefone:      z.string().max(20).optional().nullable().transform(v => v || null),
+  email:         z.string().optional().nullable().transform(v => v || null),
+  dataAdmissao:  z.string().min(1, 'Data de admissão obrigatória'),
+  funcaoId:      z.string().optional().nullable().transform(v => v || null),
+  escalaId:      z.string().optional().nullable().transform(v => v || null),
+  tipoPix:       z.string().optional().nullable().transform(v => v || null),
+  chavePix:      z.string().optional().nullable().transform(v => v || null),
+  banco:         z.string().optional().nullable().transform(v => v || null),
+  agencia:       z.string().optional().nullable().transform(v => v || null),
+  contaBancaria: z.string().optional().nullable().transform(v => v || null),
 })
 
 // GET /api/colaboradores
