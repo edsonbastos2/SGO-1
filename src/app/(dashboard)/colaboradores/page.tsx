@@ -114,9 +114,15 @@ export default function ColaboradoresPage() {
       if (filtroStatus) params.set("status", filtroStatus);
       const res = await fetch(`/api/colaboradores?${params}`);
       const data = await res.json();
-      setColaboradores(data.colaboradores ?? []);
-      setTotal(data.total ?? 0);
-      setPages(data.pages ?? 1);
+      if (Array.isArray(data)) {
+        setColaboradores(data)
+        setTotal(data.length)
+        setPages(1)
+      } else {
+        setColaboradores(data.colaboradores ?? [])
+        setTotal(data.total ?? 0)
+        setPages(data.pages ?? 1)
+      }
     } finally {
       setLoading(false);
     }
