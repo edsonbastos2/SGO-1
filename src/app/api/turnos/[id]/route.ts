@@ -13,13 +13,20 @@ const schema = z.object({
   ativo: z.boolean(),
 });
 
+type RouteParams = {
+  id: string;
+};
+
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<RouteParams> },
 ) {
   try {
     const data = schema.parse(await req.json());
-    const turno = await prisma.turno.update({ where: { id: params.id }, data });
+    const turno = await prisma.turno.update({
+      where: { id: (await params).id },
+      data,
+    });
     return NextResponse.json(turno);
   } catch (e: any) {
     if (e?.name === "ZodError")
@@ -30,10 +37,6 @@ export async function PUT(
     );
   }
 }
-
-type RouteParams = {
-  id: string;
-};
 
 export async function DELETE(
   _: NextRequest,
