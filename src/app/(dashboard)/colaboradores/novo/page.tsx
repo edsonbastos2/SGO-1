@@ -48,10 +48,9 @@ const schema = z.object({
   prestadoraId: z.string().min(1, "Obrigatório"),
   nome: z.string().min(2, "Mínimo 2 caracteres").max(120),
   cpf: z.string()
-  .min(11, 'CPF inválido')
-  .max(14)
-  .transform(v => v.replace(/\D/g, ''))
-  .refine(v => v.length === 11, 'CPF deve ter 11 dígitos'),
+    .min(11, 'CPF inválido')
+    .max(14)
+    .refine(v => v.replace(/\D/g, '').length === 11, 'CPF deve ter 11 dígitos'),
   dataNasc: z.string().optional(),
   telefone: z.string().max(20).optional(),
   email: z.string().optional(),
