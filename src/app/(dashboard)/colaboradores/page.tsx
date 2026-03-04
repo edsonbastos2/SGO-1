@@ -113,15 +113,19 @@ export default function ColaboradoresPage() {
       });
       if (filtroStatus) params.set("status", filtroStatus);
       const res = await fetch(`/api/colaboradores?${params}`);
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        setColaboradores(data)
-        setTotal(data.length)
+      const json = await res.json();
+      if (Array.isArray(json)) {
+        setColaboradores(json)
+        setTotal(json.length)
         setPages(1)
+      } else if (json.data) {
+        setColaboradores(json.data)
+        setTotal(json.total ?? 0)
+        setPages(Math.ceil((json.total ?? 0) / 20))
       } else {
-        setColaboradores(data.colaboradores ?? [])
-        setTotal(data.total ?? 0)
-        setPages(data.pages ?? 1)
+        setColaboradores(json.colaboradores ?? [])
+        setTotal(json.total ?? 0)
+        setPages(json.pages ?? 1)
       }
     } finally {
       setLoading(false);
