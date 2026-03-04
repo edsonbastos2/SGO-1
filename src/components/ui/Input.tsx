@@ -7,12 +7,12 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?:   string
   error?:   string
   hint?:    string
-  prefix?:  React.ReactNode
-  suffix?:  React.ReactNode
+  prefixIcon?:  React.ReactNode
+  suffixIcon?:  React.ReactNode
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, hint, prefix, suffix, className, type, id, ...props }, ref) => {
+  ({ label, error, hint, prefixIcon, suffixIcon, className, type, id, ...props }, ref) => {
     const [showPwd, setShowPwd] = useState(false)
     const inputId    = id ?? label?.toLowerCase().replace(/\s+/g, '-')
     const isPassword = type === 'password'
@@ -39,9 +39,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               : 'border-[var(--border)] group-focus-within:border-blue-500/70 group-focus-within:shadow-[0_0_0_3px_rgba(59,130,246,0.08)]',
           )} />
 
-          {prefix && (
+          {prefixIcon && (
             <div className="absolute left-3 text-[var(--text-muted)] z-10 flex items-center">
-              {prefix}
+              {prefixIcon}
             </div>
           )}
 
@@ -55,8 +55,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               'h-10 transition-colors duration-150',
               'font-["IBM_Plex_Sans"]',
               'focus:outline-none',
-              prefix  ? 'pl-9'  : 'pl-3',
-              (suffix || isPassword) ? 'pr-10' : 'pr-3',
+              prefixIcon  ? 'pl-9'  : 'pl-3',
+              (suffixIcon || isPassword) ? 'pr-10' : 'pr-3',
               className,
             )}
             {...props}
@@ -73,9 +73,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             </button>
           )}
 
-          {suffix && !isPassword && (
+          {suffixIcon && !isPassword && (
             <div className="absolute right-3 text-[var(--text-muted)] z-10 flex items-center">
-              {suffix}
+              {suffixIcon}
             </div>
           )}
         </div>
