@@ -1,5 +1,9 @@
 {
-  "/(auth)/login/page": "app/(auth)/login/page.js",
+  "/(dashboard)/competencias/page": "app/(dashboard)/competencias/page.js",
+  "/(dashboard)/faltas/page": "app/(dashboard)/faltas/page.js",
   "/_not-found/page": "app/_not-found/page.js",
-  "/api/auth/login/route": "app/api/auth/login/route.js"
+  "/api/competencias/route": "app/api/competencias/route.js",
+  "/api/faltas/route": "app/api/faltas/route.js",
+  "/api/postos/route": "app/api/postos/route.js",
+  "/api/turnos/route": "app/api/turnos/route.js"
 }

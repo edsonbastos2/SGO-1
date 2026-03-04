@@ -3,5 +3,5 @@
   "sources": [],
   "sections": [
     {"offset": {"line": 3, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
-    {"offset": {"line": 11, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/edson/Downloads/sgo-projeto-base/src/app/page.tsx"],"sourcesContent":["export default function Home() {\n  return (\n    <main className=\"flex min-h-screen items-center justify-center\">\n      <h1 className=\"text-2xl font-bold\">SGO - Sistema de Gestão Operacional</h1>\n    </main>\n  )\n}\n"],"names":[],"mappings":";;;;;;AAAe,SAAS;IACtB,qBACE,8OAAC;QAAK,WAAU;kBACd,cAAA,8OAAC;YAAG,WAAU;sBAAqB;;;;;;;;;;;AAGzC","debugId":null}}]
+    {"offset": {"line": 11, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/edson/Downloads/sgo-projeto-base/src/app/page.tsx"],"sourcesContent":["import { redirect } from 'next/navigation'\nexport default function RootPage() {\n  redirect('/login')\n}\n"],"names":[],"mappings":";;;;AAAA;AAAA;;AACe,SAAS;IACtB,IAAA,iMAAQ,EAAC;AACX","debugId":null}}]
 }
