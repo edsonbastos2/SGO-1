@@ -1,16 +1,16 @@
 {
-  "/(dashboard)/alocacoes/page": "app/(dashboard)/alocacoes/page.js",
+  "/(dashboard)/colaboradores/[id]/page": "app/(dashboard)/colaboradores/[id]/page.js",
+  "/(dashboard)/colaboradores/novo/page": "app/(dashboard)/colaboradores/novo/page.js",
   "/(dashboard)/colaboradores/page": "app/(dashboard)/colaboradores/page.js",
   "/(dashboard)/dashboard/page": "app/(dashboard)/dashboard/page.js",
-  "/(dashboard)/faltas/page": "app/(dashboard)/faltas/page.js",
-  "/(dashboard)/funcoes/page": "app/(dashboard)/funcoes/page.js",
   "/(dashboard)/tomadores/page": "app/(dashboard)/tomadores/page.js",
   "/_not-found/page": "app/_not-found/page.js",
-  "/api/alocacoes/route": "app/api/alocacoes/route.js",
+  "/api/colaboradores/[id]/route": "app/api/colaboradores/[id]/route.js",
   "/api/colaboradores/route": "app/api/colaboradores/route.js",
-  "/api/competencias/route": "app/api/competencias/route.js",
-  "/api/faltas/route": "app/api/faltas/route.js",
+  "/api/escalas/route": "app/api/escalas/route.js",
   "/api/funcoes/route": "app/api/funcoes/route.js",
+  "/api/postos/route": "app/api/postos/route.js",
   "/api/prestadoras/route": "app/api/prestadoras/route.js",
-  "/api/tomadores/route": "app/api/tomadores/route.js"
+  "/api/tomadores/route": "app/api/tomadores/route.js",
+  "/api/turnos/route": "app/api/turnos/route.js"
 }

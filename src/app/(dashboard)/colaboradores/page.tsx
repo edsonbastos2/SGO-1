@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
+import { ModalImportar } from "@/components/colaboradores/ModalImportar";
 import {
   Plus,
   Search,
@@ -10,6 +11,7 @@ import {
   Briefcase,
   MapPin,
   Clock,
+  Upload,
 } from "lucide-react";
 import { clsx } from "clsx";
 import Link from "next/link";
@@ -31,6 +33,12 @@ interface Colaborador {
     };
     turno: { nome: string; entrada: string; saida: string };
   }>;
+}
+
+interface Prestadora {
+  id: string;
+  nomeFantasia: string | null;
+  razaoSocial: string;
 }
 
 const STATUS_CONFIG = {
@@ -102,6 +110,8 @@ export default function ColaboradoresPage() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [pages, setPages] = useState(1);
+  const [importarModal, setImportarModal] = useState(false);
+  const [prestadoras, setPrestadoras] = useState<Prestadora[]>([]);
 
   const carregar = useCallback(async () => {
     setLoading(true);
@@ -115,17 +125,17 @@ export default function ColaboradoresPage() {
       const res = await fetch(`/api/colaboradores?${params}`);
       const json = await res.json();
       if (Array.isArray(json)) {
-        setColaboradores(json)
-        setTotal(json.length)
-        setPages(1)
+        setColaboradores(json);
+        setTotal(json.length);
+        setPages(1);
       } else if (json.data) {
-        setColaboradores(json.data)
-        setTotal(json.total ?? 0)
-        setPages(Math.ceil((json.total ?? 0) / 20))
+        setColaboradores(json.data);
+        setTotal(json.total ?? 0);
+        setPages(Math.ceil((json.total ?? 0) / 20));
       } else {
-        setColaboradores(json.colaboradores ?? [])
-        setTotal(json.total ?? 0)
-        setPages(json.pages ?? 1)
+        setColaboradores(json.colaboradores ?? []);
+        setTotal(json.total ?? 0);
+        setPages(json.pages ?? 1);
       }
     } finally {
       setLoading(false);
@@ -138,6 +148,12 @@ export default function ColaboradoresPage() {
   useEffect(() => {
     carregar();
   }, [carregar]);
+
+  useEffect(() => {
+    fetch("/api/prestadoras")
+      .then((r) => r.json())
+      .then((data) => setPrestadoras(Array.isArray(data) ? data : []));
+  }, []);
 
   const formatCPF = (cpf: string) =>
     cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
@@ -154,15 +170,23 @@ export default function ColaboradoresPage() {
               : "Gestão de colaboradores"}
           </p>
         </div>
-        <Link
-          href="/colaboradores/novo"
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors"
-        >
-          <Plus size={15} />
-          <span className="hidden sm:inline">Novo Colaborador</span>
-        </Link>
-      </div>
 
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setImportarModal(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--border-default)] text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors"
+          >
+            <Upload size={15} /> Importar
+          </button>
+          <Link
+            href="/colaboradores/novo"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors"
+          >
+            <Plus size={15} />
+            <span className="hidden sm:inline">Novo Colaborador</span>
+          </Link>
+        </div>
+      </div>
       {/* Filtros */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
@@ -207,6 +231,13 @@ export default function ColaboradoresPage() {
         </div>
       </div>
 
+      {importarModal && (
+        <ModalImportar
+          prestadoras={prestadoras}
+          onClose={() => setImportarModal(false)}
+          onSave={carregar}
+        />
+      )}
       {/* Lista */}
       <div className="bg-[#0f1623] border border-[#1a2540] rounded-xl overflow-hidden">
         {loading ? (

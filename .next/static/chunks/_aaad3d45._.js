@@ -112,13 +112,25 @@ function ColaboradoresPage() {
                 });
                 if (filtroStatus) params.set("status", filtroStatus);
                 const res = await fetch("/api/colaboradores?".concat(params));
-                const data = await res.json();
-                var _data_colaboradores;
-                setColaboradores((_data_colaboradores = data.colaboradores) !== null && _data_colaboradores !== void 0 ? _data_colaboradores : []);
-                var _data_total;
-                setTotal((_data_total = data.total) !== null && _data_total !== void 0 ? _data_total : 0);
-                var _data_pages;
-                setPages((_data_pages = data.pages) !== null && _data_pages !== void 0 ? _data_pages : 1);
+                const json = await res.json();
+                if (Array.isArray(json)) {
+                    setColaboradores(json);
+                    setTotal(json.length);
+                    setPages(1);
+                } else if (json.data) {
+                    setColaboradores(json.data);
+                    var _json_total;
+                    setTotal((_json_total = json.total) !== null && _json_total !== void 0 ? _json_total : 0);
+                    var _json_total1;
+                    setPages(Math.ceil(((_json_total1 = json.total) !== null && _json_total1 !== void 0 ? _json_total1 : 0) / 20));
+                } else {
+                    var _json_colaboradores;
+                    setColaboradores((_json_colaboradores = json.colaboradores) !== null && _json_colaboradores !== void 0 ? _json_colaboradores : []);
+                    var _json_total2;
+                    setTotal((_json_total2 = json.total) !== null && _json_total2 !== void 0 ? _json_total2 : 0);
+                    var _json_pages;
+                    setPages((_json_pages = json.pages) !== null && _json_pages !== void 0 ? _json_pages : 1);
+                }
             } finally{
                 setLoading(false);
             }
@@ -157,7 +169,7 @@ function ColaboradoresPage() {
                                 children: "Colaboradores"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                lineNumber: 140,
+                                lineNumber: 150,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -165,13 +177,13 @@ function ColaboradoresPage() {
                                 children: total > 0 ? "".concat(total, " colaborador").concat(total !== 1 ? "es" : "", " encontrado").concat(total !== 1 ? "s" : "") : "Gestão de colaboradores"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                lineNumber: 141,
+                                lineNumber: 151,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                        lineNumber: 139,
+                        lineNumber: 149,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -182,7 +194,7 @@ function ColaboradoresPage() {
                                 size: 15
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                lineNumber: 151,
+                                lineNumber: 161,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -190,19 +202,19 @@ function ColaboradoresPage() {
                                 children: "Novo Colaborador"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                lineNumber: 152,
+                                lineNumber: 162,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                        lineNumber: 147,
+                        lineNumber: 157,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                lineNumber: 138,
+                lineNumber: 148,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -216,7 +228,7 @@ function ColaboradoresPage() {
                                 className: "absolute left-3 top-1/2 -translate-y-1/2 text-[#445870]"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                lineNumber: 159,
+                                lineNumber: 169,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -226,13 +238,13 @@ function ColaboradoresPage() {
                                 className: "w-full bg-[#0f1623] border border-[#1a2540] rounded-lg pl-9 pr-4 py-2.5 text-sm text-white placeholder-[#2a3f5f] outline-none focus:border-blue-500/50 transition-colors"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                lineNumber: 163,
+                                lineNumber: 173,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                        lineNumber: 158,
+                        lineNumber: 168,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -267,7 +279,7 @@ function ColaboradoresPage() {
                                     children: l
                                 }, v, false, {
                                     fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                    lineNumber: 178,
+                                    lineNumber: 188,
                                     columnNumber: 13
                                 }, this);
                             }),
@@ -278,24 +290,24 @@ function ColaboradoresPage() {
                                     size: 13
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                    lineNumber: 195,
+                                    lineNumber: 205,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                lineNumber: 191,
+                                lineNumber: 201,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                        lineNumber: 170,
+                        lineNumber: 180,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                lineNumber: 157,
+                lineNumber: 167,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -308,14 +320,14 @@ function ColaboradoresPage() {
                             className: "animate-spin"
                         }, void 0, false, {
                             fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                            lineNumber: 204,
+                            lineNumber: 214,
                             columnNumber: 13
                         }, this),
                         " Carregando..."
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                    lineNumber: 203,
+                    lineNumber: 213,
                     columnNumber: 11
                 }, this) : colaboradores.length === 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                     className: "flex flex-col items-center justify-center h-48 gap-2",
@@ -325,7 +337,7 @@ function ColaboradoresPage() {
                             className: "text-[#2a3f5f]"
                         }, void 0, false, {
                             fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                            lineNumber: 208,
+                            lineNumber: 218,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -333,7 +345,7 @@ function ColaboradoresPage() {
                             children: "Nenhum colaborador encontrado"
                         }, void 0, false, {
                             fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                            lineNumber: 209,
+                            lineNumber: 219,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -342,13 +354,13 @@ function ColaboradoresPage() {
                             children: "Cadastrar primeiro colaborador"
                         }, void 0, false, {
                             fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                            lineNumber: 212,
+                            lineNumber: 222,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                    lineNumber: 207,
+                    lineNumber: 217,
                     columnNumber: 11
                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
                     children: [
@@ -373,17 +385,17 @@ function ColaboradoresPage() {
                                                     children: h
                                                 }, h, false, {
                                                     fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                    lineNumber: 234,
+                                                    lineNumber: 244,
                                                     columnNumber: 23
                                                 }, this))
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                            lineNumber: 224,
+                                            lineNumber: 234,
                                             columnNumber: 19
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                        lineNumber: 223,
+                                        lineNumber: 233,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
@@ -405,12 +417,12 @@ function ColaboradoresPage() {
                                                                         nome: c.nome
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                                        lineNumber: 255,
+                                                                        lineNumber: 265,
                                                                         columnNumber: 31
                                                                     }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                                    lineNumber: 254,
+                                                                    lineNumber: 264,
                                                                     columnNumber: 29
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -420,7 +432,7 @@ function ColaboradoresPage() {
                                                                             children: c.nome
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                                            lineNumber: 258,
+                                                                            lineNumber: 268,
                                                                             columnNumber: 31
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -428,24 +440,24 @@ function ColaboradoresPage() {
                                                                             children: formatCPF(c.cpf)
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                                            lineNumber: 261,
+                                                                            lineNumber: 271,
                                                                             columnNumber: 31
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                                    lineNumber: 257,
+                                                                    lineNumber: 267,
                                                                     columnNumber: 29
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                            lineNumber: 253,
+                                                            lineNumber: 263,
                                                             columnNumber: 27
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                        lineNumber: 252,
+                                                        lineNumber: 262,
                                                         columnNumber: 25
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -455,12 +467,12 @@ function ColaboradoresPage() {
                                                             children: c.matricula
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                            lineNumber: 269,
+                                                            lineNumber: 279,
                                                             columnNumber: 27
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                        lineNumber: 268,
+                                                        lineNumber: 278,
                                                         columnNumber: 25
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -473,32 +485,32 @@ function ColaboradoresPage() {
                                                                     className: "text-[#445870]"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                                    lineNumber: 277,
+                                                                    lineNumber: 287,
                                                                     columnNumber: 31
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                     children: c.funcao.nome
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                                    lineNumber: 278,
+                                                                    lineNumber: 288,
                                                                     columnNumber: 31
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                            lineNumber: 276,
+                                                            lineNumber: 286,
                                                             columnNumber: 29
                                                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                             className: "text-[#2a3f5f]",
                                                             children: "—"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                            lineNumber: 281,
+                                                            lineNumber: 291,
                                                             columnNumber: 29
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                        lineNumber: 274,
+                                                        lineNumber: 284,
                                                         columnNumber: 25
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -514,7 +526,7 @@ function ColaboradoresPage() {
                                                                             className: "text-[#445870]"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                                            lineNumber: 289,
+                                                                            lineNumber: 299,
                                                                             columnNumber: 33
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -526,13 +538,13 @@ function ColaboradoresPage() {
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                                            lineNumber: 290,
+                                                                            lineNumber: 300,
                                                                             columnNumber: 33
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                                    lineNumber: 288,
+                                                                    lineNumber: 298,
                                                                     columnNumber: 31
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -542,7 +554,7 @@ function ColaboradoresPage() {
                                                                             size: 10
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                                            lineNumber: 297,
+                                                                            lineNumber: 307,
                                                                             columnNumber: 33
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -554,31 +566,31 @@ function ColaboradoresPage() {
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                                            lineNumber: 298,
+                                                                            lineNumber: 308,
                                                                             columnNumber: 33
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                                    lineNumber: 296,
+                                                                    lineNumber: 306,
                                                                     columnNumber: 31
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                            lineNumber: 287,
+                                                            lineNumber: 297,
                                                             columnNumber: 29
                                                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                             className: "text-[10px] text-amber-400 font-mono bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded",
                                                             children: "Sem alocação"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                            lineNumber: 305,
+                                                            lineNumber: 315,
                                                             columnNumber: 29
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                        lineNumber: 285,
+                                                        lineNumber: 295,
                                                         columnNumber: 25
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -586,7 +598,7 @@ function ColaboradoresPage() {
                                                         children: new Date(c.dataAdmissao).toLocaleDateString("pt-BR")
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                        lineNumber: 311,
+                                                        lineNumber: 321,
                                                         columnNumber: 25
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -595,12 +607,12 @@ function ColaboradoresPage() {
                                                             status: c.status
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                            lineNumber: 316,
+                                                            lineNumber: 326,
                                                             columnNumber: 27
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                        lineNumber: 315,
+                                                        lineNumber: 325,
                                                         columnNumber: 25
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -613,40 +625,40 @@ function ColaboradoresPage() {
                                                                 children: "Ver detalhes"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                                lineNumber: 321,
+                                                                lineNumber: 331,
                                                                 columnNumber: 29
                                                             }, this)
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                            lineNumber: 320,
+                                                            lineNumber: 330,
                                                             columnNumber: 27
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                        lineNumber: 319,
+                                                        lineNumber: 329,
                                                         columnNumber: 25
                                                     }, this)
                                                 ]
                                             }, c.id, true, {
                                                 fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                lineNumber: 247,
+                                                lineNumber: 257,
                                                 columnNumber: 23
                                             }, this);
                                         })
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                        lineNumber: 243,
+                                        lineNumber: 253,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                lineNumber: 222,
+                                lineNumber: 232,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                            lineNumber: 221,
+                            lineNumber: 231,
                             columnNumber: 13
                         }, this),
                         pages > 1 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -665,7 +677,7 @@ function ColaboradoresPage() {
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                    lineNumber: 339,
+                                    lineNumber: 349,
                                     columnNumber: 17
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -679,12 +691,12 @@ function ColaboradoresPage() {
                                                 size: 14
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                lineNumber: 348,
+                                                lineNumber: 358,
                                                 columnNumber: 21
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                            lineNumber: 343,
+                                            lineNumber: 353,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -695,24 +707,24 @@ function ColaboradoresPage() {
                                                 size: 14
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                                lineNumber: 355,
+                                                lineNumber: 365,
                                                 columnNumber: 21
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                            lineNumber: 350,
+                                            lineNumber: 360,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                    lineNumber: 342,
+                                    lineNumber: 352,
                                     columnNumber: 17
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                            lineNumber: 338,
+                            lineNumber: 348,
                             columnNumber: 15
                         }, this),
                         pages <= 1 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -725,25 +737,25 @@ function ColaboradoresPage() {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                                lineNumber: 362,
+                                lineNumber: 372,
                                 columnNumber: 17
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                            lineNumber: 361,
+                            lineNumber: 371,
                             columnNumber: 15
                         }, this)
                     ]
                 }, void 0, true)
             }, void 0, false, {
                 fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-                lineNumber: 201,
+                lineNumber: 211,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/(dashboard)/colaboradores/page.tsx",
-        lineNumber: 136,
+        lineNumber: 146,
         columnNumber: 5
     }, this);
 }
